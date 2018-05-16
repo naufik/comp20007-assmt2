@@ -60,5 +60,3 @@ Bucket *hashmap_find(HashMap *h, char* item) {
 
   return found ? current : NULL;
 }
-
-}
