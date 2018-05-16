@@ -16,6 +16,11 @@ struct bucket {
   Bucket *next;
 };
 
+/**
+  Creates a new hashmap.
+  @param n_buckets the number of buckets in the hashtable.
+  @param hash_function the number of hash buckets.
+*/
 HashMap *new_hashmap(int n_buckets, int (*hash_function)(char*)) {
   HashMap *h = malloc(sizeof(HashMap));
   assert(h);
@@ -30,6 +35,11 @@ HashMap *new_hashmap(int n_buckets, int (*hash_function)(char*)) {
   return h;
 }
 
+/**
+  Inserts a string item into the HashMap
+  @param h the hashmap to insert the item to.
+  @param item the string item to be inserted.
+*/
 void hashmap_insert(HashMap *h, char *item) {
   int index = h->hash(item);
   index %= n_buckets;
@@ -47,7 +57,12 @@ void hashmap_insert(HashMap *h, char *item) {
   h->buckets[index] = new_bucket;
 }
 
-Bucket *hashmap_find(HashMap *h, char* item) {
+/**
+  Looks up a string item inside the HashMap .
+  @param h the hashmap to look for the item in.
+  @param item the item to look for inside the hashmap.
+*/
+Bucket *hashmap_find(HashMap *h, char *item) {
   int index = h->hash(item);
   index %= n_buckets;
 
@@ -59,4 +74,22 @@ Bucket *hashmap_find(HashMap *h, char* item) {
   }
 
   return found ? current : NULL;
+}
+
+/**
+  Frees the HashMap from the memory.
+  @param h the hashmap to free.
+*/
+void free_hashmap(HashMap *h) {
+  for (int i = 0; i < h->n_buckets; ++i) {
+    current = h->buckets[i];
+    while(current != NULL) {
+      Bucket *next = current->next;
+      free(current);
+      current = next;
+    }
+  }
+
+  free(h->buckets);
+  free(h);
 }
