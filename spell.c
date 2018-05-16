@@ -8,7 +8,10 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "list.h"
 #include "spell.h"
+#include "hashmap.h"
+#include "dictionary.h"
 
 #define ALPHABET "abcdefghijklmnopqrstuvwxyz"
 
@@ -64,7 +67,23 @@ void print_all_edits(char *word) {
 
 // see Assignment Task 3: Spell checking
 void print_checked(List *dictionary, List *document) {
-  //make dictionary hashmap
+  HashMap *d = new_dictionary(200000);
+  Node *current = dictionary->head;
+
+  while (current != NULL) {
+    hashmap_insert(d, (char*)current->data);
+    current = current->next;
+  }
+
+  current = document->head;
+  while (current != NULL) {
+    char *word = (char*)current->data;
+    printf("%s", word);
+    if (!hashmap_find(d, word)) {
+      printf("?");
+    }
+    printf("\n");
+  }
 }
 
 // see Assignment Task 4: Spelling correction

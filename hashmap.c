@@ -3,29 +3,22 @@
   Author: Naufal Fikri Setiawan (nsetiawan@student.unimelb.edu.au)
 */
 
-typedef struct {
-  int (*hash)(char*);
-  int size;
-  Bucket **buckets;
-} HashMap;
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
+#include "hashmap.h"
 
-typedef struct bucket Bucket;
-
-struct bucket {
-  char *content;
-  Bucket *next;
-};
 
 /**
   Creates a new hashmap.
   @param n_buckets the number of buckets in the hashtable.
   @param hash_function the number of hash buckets.
 */
-HashMap *new_hashmap(int n_buckets, int (*hash_function)(char*)) {
+HashMap *new_hashmap(int n_buckets, unsigned int (*hash_function)(char*)) {
   HashMap *h = malloc(sizeof(HashMap));
   assert(h);
 
-  Bucket *b = malloc(n_buckets * sizeof(Bucket*));
+  Bucket **b = malloc(n_buckets * sizeof(Bucket*));
   assert(b);
 
   h->buckets = b;
@@ -42,7 +35,7 @@ HashMap *new_hashmap(int n_buckets, int (*hash_function)(char*)) {
 */
 void hashmap_insert(HashMap *h, char *item) {
   int index = h->hash(item);
-  index %= n_buckets;
+  index %= h->size;
 
   Bucket *current = h->buckets[index];
   Bucket *new_bucket = malloc(sizeof(Bucket));
@@ -64,7 +57,7 @@ void hashmap_insert(HashMap *h, char *item) {
 */
 Bucket *hashmap_find(HashMap *h, char *item) {
   int index = h->hash(item);
-  index %= n_buckets;
+  index %= h->size;
 
   Bucket *current = h->buckets[index];
   int found = 0;
@@ -81,8 +74,8 @@ Bucket *hashmap_find(HashMap *h, char *item) {
   @param h the hashmap to free.
 */
 void free_hashmap(HashMap *h) {
-  for (int i = 0; i < h->n_buckets; ++i) {
-    current = h->buckets[i];
+  for (int i = 0; i < h->size; ++i) {
+    Bucket *current = h->buckets[i];
     while(current != NULL) {
       Bucket *next = current->next;
       free(current);
