@@ -1,4 +1,7 @@
-/* ... */
+/* 
+  COMP20007 Design of Algorithms - Solution to Assignment 2
+  Naufal F. Setiawan <nsetiawan@student.unimelb.edu.au>
+*/
 
 #include <stdio.h>
 #include <string.h>
@@ -7,8 +10,12 @@
 
 #include "spell.h"
 
+#define ALPHABET "abcdefghijklmnopqrstuvwxyz"
+
+/** FUNCTION PROTOTYPES */
 int edit_dist(char* word1, char* word2);
 
+/** FUNCTION DEFINITIONS */
 int min(int a, int b) {
   return a < b ? a : b;
 }
@@ -20,18 +27,49 @@ void print_edit_distance(char *word1, char *word2) {
 
 // see Assignment Task 2: Enumerating all possible edits
 void print_all_edits(char *word) {
-	printf("not yet implemented: put code for task 2 here\n");
-}
+  for (int i = 0; word[i] != '\0'; ++i) {
+    for (int j = 0; ALPHABET[j] != '\0'; ++j) {
 
+      // printing all pre-insertion edits at i
+      for (int k = 0; word[k] != '\0'; ++k) {
+        if (k == i) {
+          printf("%c", ALPHABET[j]);
+        }
+        printf("%c", word[k]);   
+      }
+      printf("\n");
+
+      // printing substitution edits at i
+      for (int k = 0; word[k] != '\0'; ++k) {
+        printf("%c", k == i && word[k] != ALPHABET[j] ? ALPHABET[j] : word[k]);
+      }
+      printf("\n");
+
+    }
+
+    //printing deletion edits at i       
+    for (int k = 0; word[k] != '\0'; ++k) {
+      if (k != i) {
+        printf("%c", word[k]);
+      }
+    }
+    printf("\n");
+  }
+
+  // printing post-insertion edits
+  for (int i = 0; ALPHABET[i] != '\0'; ++i) {
+    printf("%s%c\n", word, ALPHABET[i]);
+  }
+}
 
 // see Assignment Task 3: Spell checking
 void print_checked(List *dictionary, List *document) {
-	printf("not yet implemented: put code for task 3 here\n");
+  //make dictionary hashmap
 }
 
 // see Assignment Task 4: Spelling correction
 void print_corrected(List *dictionary, List *document) {
-	printf("not yet implemented: put code for task 4 here\n");
+  //make dictionary hashmap
 }
 
 // Calculates the edit distance between two words.
@@ -53,11 +91,12 @@ int edit_dist(char *word1, char *word2) {
 
     for (int j = 0; word1[j] != '\0'; ++j) {
 
-      // index that corresponds to current comparison (shifted by the empty)
-      // string base case.
+      // index that corresponds to current comparison (shifted by the empty
+      // string base case).
       int index = j + 1;
 
-      // Calculate individual costs.
+      // Calculate individual costs for traversing horizontally or
+      // vertically or diagonally.
       int v_cost = previous[index] + 1;
       int h_cost = current[index - 1] + 1;
       int diag_cost = previous[index - 1] + (word2[i] != word1[j]);
@@ -66,13 +105,13 @@ int edit_dist(char *word1, char *word2) {
       current[index] = min(diag_cost, min(v_cost, h_cost));
     }
 
+    //shifts table
     if (word2[i + 1] != '\0') {
       int *temp = current;
       current = previous;
       previous = temp;
     }
 
-    //shifts table
   }
 
   return current[table_width - 1];
