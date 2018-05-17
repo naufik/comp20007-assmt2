@@ -142,3 +142,54 @@ int edit_dist(char *word1, char *word2) {
   free(current);
   return dist;
 }
+
+// given a word, calculates the number of edits possible when we
+// have a set of alphabet letters.
+unsigned int n_edits(char *word) {
+  unsigned int str_size = strlen(word);
+  unsigned int abc_size = strlen(ALPHABET);
+
+  // pre-insertion + substitution + post-insertion + removal edits.
+  return 2*(str_size*abc_size) + abc_size + str_size;
+}
+
+//
+char **generate_edits(char *word) {
+  char **edits = malloc(n_edits(word) * sizeof(char*));
+  char word_size = strlen(word);
+
+  // allocate memory for each string, this is gonna be a pain
+  // in the neck to free()
+  for (int i = 0; i < n_edits(word); ++i) {
+    edits[i] = malloc(MAX_WORD_SIZE * sizeof(char));
+  }
+
+  int current = 0;
+
+  // replacement edits
+  for (int i = 0; ALPHABET[i] != '\0'; ++i) {
+    for (int j = 0; j < word_size; ++j) {
+      strcpy(edits[current], word);
+      edits[current++][j] = ALPHABET[i];
+    }
+  }
+
+  // post-insertion edits
+  for (int i = 0; ALPHABET[i] != '\0'; ++i) {
+    strcpy(edits[current], word);
+    edits[current][word_size] = ALPHABET[i];
+    edits[current++][word_size + 1] = '\0';
+  }
+
+  // removal edits.
+  for (int i = 0; i < word_size; ++i) {
+    memcpy(edits[current] * )
+  }
+
+  // pre-insertion edits (can be optimized but i can't be fucked);
+  for (int i = 0; ALPHABET[i] != '\0'; ++i) {
+    for (int j = 0; j < word_size; ++j) {
+
+    }
+  }
+}
