@@ -25,7 +25,6 @@ unsigned int universal_hash(char *key) {
   for (i = 0; key[i] != '\0'; i++) {
     h = h + r[i] * key[i];
   }
-
   return h;
 }
 

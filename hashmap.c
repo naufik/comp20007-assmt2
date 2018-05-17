@@ -6,7 +6,10 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 #include "hashmap.h"
+
+#define KEY_SIZE 128
 
 
 /**
@@ -34,13 +37,14 @@ HashMap *new_hashmap(int n_buckets, unsigned int (*hash_function)(char*)) {
   @param item the string item to be inserted.
 */
 void hashmap_insert(HashMap *h, char *item) {
-  int index = h->hash(item);
+  unsigned int index = h->hash(item);
   index %= h->size;
 
   Bucket *current = h->buckets[index];
   Bucket *new_bucket = malloc(sizeof(Bucket));
   assert(new_bucket);
 
+  new_bucket->content = malloc(KEY_SIZE * sizeof(char));
   strcpy(new_bucket->content, item);
 
   if (current != NULL) {
@@ -56,13 +60,15 @@ void hashmap_insert(HashMap *h, char *item) {
   @param item the item to look for inside the hashmap.
 */
 Bucket *hashmap_find(HashMap *h, char *item) {
-  int index = h->hash(item);
+  unsigned int index = h->hash(item);
   index %= h->size;
 
   Bucket *current = h->buckets[index];
   int found = 0;
-
-  while (current == NULL || !(found = strcmp(current->content, item))) {
+  while (current != NULL) {
+    if ((found = (strcmp(current->content, item) == 0))) {
+      break;
+    }
     current = current->next;
   }
 
@@ -78,6 +84,7 @@ void free_hashmap(HashMap *h) {
     Bucket *current = h->buckets[i];
     while(current != NULL) {
       Bucket *next = current->next;
+      free(current->content);
       free(current);
       current = next;
     }

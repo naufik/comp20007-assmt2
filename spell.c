@@ -67,7 +67,7 @@ void print_all_edits(char *word) {
 
 // see Assignment Task 3: Spell checking
 void print_checked(List *dictionary, List *document) {
-  HashMap *d = new_dictionary(200000);
+  HashMap *d = new_dictionary(100-00);
   Node *current = dictionary->head;
 
   while (current != NULL) {
@@ -83,7 +83,10 @@ void print_checked(List *dictionary, List *document) {
       printf("?");
     }
     printf("\n");
+    current = current->next;
   }
+
+  free_hashmap(d);
 }
 
 // see Assignment Task 4: Spelling correction
@@ -133,5 +136,9 @@ int edit_dist(char *word1, char *word2) {
 
   }
 
-  return current[table_width - 1];
+  int dist = current[table_width - 1];
+  
+  free(previous);
+  free(current);
+  return dist;
 }
