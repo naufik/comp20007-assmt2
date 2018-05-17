@@ -67,7 +67,7 @@ void print_all_edits(char *word) {
 
 // see Assignment Task 3: Spell checking
 void print_checked(List *dictionary, List *document) {
-  HashMap *d = new_dictionary(100-00);
+  HashMap *d = new_dictionary(2000000);
   Node *current = dictionary->head;
 
   while (current != NULL) {
