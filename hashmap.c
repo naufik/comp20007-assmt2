@@ -64,12 +64,24 @@ Bucket *hashmap_find(HashMap *h, char *item) {
   index %= h->size;
 
   Bucket *current = h->buckets[index];
+  Bucket *previous = NULL;
+
   int found = 0;
   while (current != NULL) {
     if ((found = (strcmp(current->content, item) == 0))) {
       break;
     }
+
+    previous = current;
     current = current->next;
+  }
+
+  if (found) {
+    if (previous) {
+      previous->next = current->next ? current->next : NULL;
+      current->next = h->buckets[index];
+      h->buckets[index] = current;
+    } 
   }
 
   return found ? current : NULL;
