@@ -116,6 +116,7 @@ void print_corrected(List *dictionary, List *document) {
     current = current->next;
   }
 
+  free_hashmap(d);
 }
 
 
