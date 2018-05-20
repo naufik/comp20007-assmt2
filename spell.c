@@ -238,6 +238,9 @@ void free_string_array(char **strings, unsigned int n) {
   free(strings);
 }
 
+// naively search the dictionary for a word that is min_dist distance
+// away from string, if such word is not found - tolerate the lowest
+// distance word found that is at most max_dist away.
 char *naive_dictionary_search(List *dictionary, char *string, 
   int min_dist, int max_dist) {
 
