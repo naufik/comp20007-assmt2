@@ -6,7 +6,8 @@
 typedef struct bucket Bucket;
 
 struct bucket {
-  char *content;
+  char *key;
+  int value;
   Bucket *next;
 };
 
@@ -19,8 +20,8 @@ typedef struct {
 
 HashMap *new_hashmap(int n_buckets, unsigned int (*hash_function)(char*));
 
-void hashmap_insert(HashMap *h, char *item);
+void hashmap_insert(HashMap *h, char *key, int value);
 
-Bucket *hashmap_find(HashMap *h, char *item);
+Bucket *hashmap_find(HashMap *h, char *key);
 
 void free_hashmap(HashMap *h);

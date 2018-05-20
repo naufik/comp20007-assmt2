@@ -16,6 +16,7 @@
 
 #define ALPHABET "abcdefghijklmnopqrstuvwxyz"
 #define MAX_WORD_SIZE 128
+#define INVALID -1
 
 /** FUNCTION PROTOTYPES */
 int edit_dist(char *word1, char *word2);
@@ -79,19 +80,27 @@ void print_corrected(List *dictionary, List *document) {
       } else {
         char **possible_edits = generate_edits(word);
         int n = n_edits(word);
-        
-        int found = 0;
+        char *correction;
+
+        int min_index = INVALID;
         for (int i = 0; i < n; ++i) {
           char *current_word = possible_edits[i];
-          if (hashmap_find(d, current_word)) {
-            printf("%s", current_word);
-            found = 1;
+          Bucket *entry = hashmap_find(d, current_word);
+
+          if (entry) {
+            if (min_index == INVALID || entry->value < min_index) {
+              correction = entry->key;
+              min_index = entry->value;
+            }
             break;
+          }
+          if (min_index != INVALID) {
+            printf("%s", correction);
           }
         }
 
-        if (!found) {
-          char *correction = naive_dictionary_search(dictionary, word,
+        if (min_index == INVALID) {
+          correction = naive_dictionary_search(dictionary, word,
             2, 3);
           if (correction != NULL) {
             printf("%s", correction);

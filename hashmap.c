@@ -15,7 +15,7 @@
 /**
   Creates a new hashmap.
   @param n_buckets the number of buckets in the hashtable.
-  @param hash_function the number of hash buckets.
+  @param hash_function the function used to hash the key.
 */
 HashMap *new_hashmap(int n_buckets, unsigned int (*hash_function)(char*)) {
   HashMap *h = malloc(sizeof(HashMap));
@@ -36,16 +36,18 @@ HashMap *new_hashmap(int n_buckets, unsigned int (*hash_function)(char*)) {
   @param h the hashmap to insert the item to.
   @param item the string item to be inserted.
 */
-void hashmap_insert(HashMap *h, char *item) {
-  unsigned int index = h->hash(item);
+void hashmap_insert(HashMap *h, char *key, int value) {
+  unsigned int index = h->hash(key);
   index %= h->size;
 
   Bucket *current = h->buckets[index];
   Bucket *new_bucket = malloc(sizeof(Bucket));
   assert(new_bucket);
 
-  new_bucket->content = malloc(KEY_SIZE * sizeof(char));
-  strcpy(new_bucket->content, item);
+  new_bucket->key = malloc(KEY_SIZE * sizeof(char));
+  strcpy(new_bucket->key, key);
+
+  new_bucket->value = value;
 
   if (current != NULL) {
     new_bucket->next = current;
@@ -59,8 +61,8 @@ void hashmap_insert(HashMap *h, char *item) {
   @param h the hashmap to look for the item in.
   @param item the item to look for inside the hashmap.
 */
-Bucket *hashmap_find(HashMap *h, char *item) {
-  unsigned int index = h->hash(item);
+Bucket *hashmap_find(HashMap *h, char *key) {
+  unsigned int index = h->hash(key);
   index %= h->size;
 
   Bucket *current = h->buckets[index];
@@ -68,7 +70,7 @@ Bucket *hashmap_find(HashMap *h, char *item) {
 
   int found = 0;
   while (current != NULL) {
-    if ((found = (strcmp(current->content, item) == 0))) {
+    if ((found = (strcmp(current->key, key) == 0))) {
       break;
     }
 
@@ -96,7 +98,7 @@ void free_hashmap(HashMap *h) {
     Bucket *current = h->buckets[i];
     while(current != NULL) {
       Bucket *next = current->next;
-      free(current->content);
+      free(current->key);
       free(current);
       current = next;
     }
