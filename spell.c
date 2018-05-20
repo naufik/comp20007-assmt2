@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <limits.h>
 
 #include "list.h"
 #include "spell.h"
@@ -21,6 +22,8 @@ int edit_dist(char *word1, char *word2);
 char **generate_edits(char *word);
 unsigned int n_edits(char *word);
 void free_string_array(char **strings, unsigned int n);
+char *naive_dictionary_search(List *dictionary, char *string, 
+  int min_dist, int max_dist);
 
 /** FUNCTION DEFINITIONS */
 int min(int a, int b) {
@@ -63,6 +66,7 @@ void print_checked(List *dictionary, List *document) {
 }
 
 // see Assignment Task 4: Spelling correction
+// TODO: hashmap priorities
 void print_corrected(List *dictionary, List *document) {
   HashMap *d = list_to_dictionary(dictionary, 200000);
 
@@ -87,7 +91,13 @@ void print_corrected(List *dictionary, List *document) {
         }
 
         if (!found) {
-          printf("%s?", word);
+          char *correction = naive_dictionary_search(dictionary, word,
+            2, 3);
+          if (correction != NULL) {
+            printf("%s", correction);
+          } else {
+            printf("%s?", word);
+          }
         }
         free_string_array(possible_edits, n_edits(word));
       }
@@ -122,6 +132,7 @@ int edit_dist(char *word1, char *word2) {
 
       // index that corresponds to current comparison (shifted by the empty
       // string base case).
+
       int index = j + 1;
 
       // Calculate individual costs for traversing horizontally or
@@ -207,9 +218,46 @@ char **generate_edits(char *word) {
   return edits;
 }
 
+// for freeing any string array with given size n. Used to free the 
+// array of edits.
 void free_string_array(char **strings, unsigned int n) {
   for (int i = 0; i < n; ++i) {
     free(strings[i]);
   }
   free(strings);
+}
+
+char *naive_dictionary_search(List *dictionary, char *string, 
+  int min_dist, int max_dist) {
+
+  int query_length = strlen(string);
+  int n = dictionary->size;
+  int best_dist = max_dist + 1;
+  char *best_word = NULL;
+
+  Node *dict_word = dictionary->head;
+  for (int i = 0; i < n; ++i) {
+    char *word = (char*)dict_word->data;
+
+    // 
+    if (abs(strlen(word) - query_length) > max_dist) {
+      dict_word = dict_word->next;
+      continue;
+    }
+
+    int dist = edit_dist(string, word);
+
+    if (dist == min_dist) {
+      return word;
+    }
+
+    if (dist <= max_dist && dist < best_dist) {
+      best_dist = dist;
+      best_word = word;
+    }
+
+    dict_word = dict_word->next;
+  }
+
+  return best_word;
 }
