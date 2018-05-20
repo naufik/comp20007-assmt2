@@ -23,7 +23,7 @@ $(EXE): $(OBJ)
 main.o: list.h spell.h
 spell.o: spell.h list.h hashmap.h dictionary.h
 list.o: list.h
-dictionary.o: dictionary.h hashmap.h
+dictionary.o: dictionary.h hashmap.h list.h
 hashmap.o: hashmap.h
 
 # ^ add any new dependencies here (for example if you add new modules)

@@ -14,9 +14,13 @@
 #include "dictionary.h"
 
 #define ALPHABET "abcdefghijklmnopqrstuvwxyz"
+#define MAX_WORD_SIZE 128
 
 /** FUNCTION PROTOTYPES */
-int edit_dist(char* word1, char* word2);
+int edit_dist(char *word1, char *word2);
+char **generate_edits(char *word);
+unsigned int n_edits(char *word);
+void free_string_array(char **strings, unsigned int n);
 
 /** FUNCTION DEFINITIONS */
 int min(int a, int b) {
@@ -30,52 +34,21 @@ void print_edit_distance(char *word1, char *word2) {
 
 // see Assignment Task 2: Enumerating all possible edits
 void print_all_edits(char *word) {
-  for (int i = 0; word[i] != '\0'; ++i) {
-    for (int j = 0; ALPHABET[j] != '\0'; ++j) {
+  char **edits = generate_edits(word);
+  int n = n_edits(word);
 
-      // printing all pre-insertion edits at i
-      for (int k = 0; word[k] != '\0'; ++k) {
-        if (k == i) {
-          printf("%c", ALPHABET[j]);
-        }
-        printf("%c", word[k]);   
-      }
-      printf("\n");
-
-      // printing substitution edits at i
-      for (int k = 0; word[k] != '\0'; ++k) {
-        printf("%c", k == i && word[k] != ALPHABET[j] ? ALPHABET[j] : word[k]);
-      }
-      printf("\n");
-
-    }
-
-    //printing deletion edits at i       
-    for (int k = 0; word[k] != '\0'; ++k) {
-      if (k != i) {
-        printf("%c", word[k]);
-      }
-    }
-    printf("\n");
+  for (unsigned int i = 0; i < n; ++i) {
+    printf("%s\n", edits[i]);
   }
 
-  // printing post-insertion edits
-  for (int i = 0; ALPHABET[i] != '\0'; ++i) {
-    printf("%s%c\n", word, ALPHABET[i]);
-  }
+  free_string_array(edits, n);
 }
 
 // see Assignment Task 3: Spell checking
 void print_checked(List *dictionary, List *document) {
-  HashMap *d = new_dictionary(2000000);
-  Node *current = dictionary->head;
+  HashMap *d = list_to_dictionary(dictionary, 200000);
 
-  while (current != NULL) {
-    hashmap_insert(d, (char*)current->data);
-    current = current->next;
-  }
-
-  current = document->head;
+  Node *current = document->head;
   while (current != NULL) {
     char *word = (char*)current->data;
     printf("%s", word);
@@ -91,8 +64,42 @@ void print_checked(List *dictionary, List *document) {
 
 // see Assignment Task 4: Spelling correction
 void print_corrected(List *dictionary, List *document) {
-  //make dictionary hashmap
+  HashMap *d = list_to_dictionary(dictionary, 200000);
+
+  Node *current = document->head;
+  while (current != NULL) {
+    char *word = (char*)current->data;
+      
+      if (hashmap_find(d, word)) {
+        printf("%s", word);
+      } else {
+        char **possible_edits = generate_edits(word);
+        int n = n_edits(word);
+        
+        int found = 0;
+        for (int i = 0; i < n; ++i) {
+          char *current_word = possible_edits[i];
+          if (hashmap_find(d, current_word)) {
+            printf("%s", current_word);
+            found = 1;
+            break;
+          }
+        }
+
+        if (!found) {
+          printf("%s?", word);
+        }
+        free_string_array(possible_edits, n_edits(word));
+      }
+
+    printf("\n");
+    current = current->next;
+  }
+
 }
+
+
+/** FUNCTIONS */
 
 // Calculates the edit distance between two words.
 int edit_dist(char *word1, char *word2) {
@@ -153,10 +160,10 @@ unsigned int n_edits(char *word) {
   return 2*(str_size*abc_size) + abc_size + str_size;
 }
 
-//
+// generates all the possible edits.
 char **generate_edits(char *word) {
   char **edits = malloc(n_edits(word) * sizeof(char*));
-  char word_size = strlen(word);
+  unsigned int word_size = strlen(word);
 
   // allocate memory for each string, this is gonna be a pain
   // in the neck to free()
@@ -174,6 +181,22 @@ char **generate_edits(char *word) {
     }
   }
 
+  // removal edits.
+  for (int i = 0; i < word_size; ++i) {
+    memcpy(edits[current], word, i * sizeof(char));
+    strcpy(&edits[current++][i], &word[i+1]);
+  }
+
+  // pre-insertion edits (can be optimized but i can't be fucked);
+  for (int i = 0; ALPHABET[i] != '\0'; ++i) {
+    for (int j = 0; j < word_size; ++j) {
+      memcpy(edits[current], word, j * sizeof(char));
+      edits[current][j] = ALPHABET[i];
+      strcpy(&edits[current++][j+1], &word[j]);
+    }
+  }
+
+
   // post-insertion edits
   for (int i = 0; ALPHABET[i] != '\0'; ++i) {
     strcpy(edits[current], word);
@@ -181,15 +204,12 @@ char **generate_edits(char *word) {
     edits[current++][word_size + 1] = '\0';
   }
 
-  // removal edits.
-  for (int i = 0; i < word_size; ++i) {
-    memcpy(edits[current] * )
-  }
+  return edits;
+}
 
-  // pre-insertion edits (can be optimized but i can't be fucked);
-  for (int i = 0; ALPHABET[i] != '\0'; ++i) {
-    for (int j = 0; j < word_size; ++j) {
-
-    }
+void free_string_array(char **strings, unsigned int n) {
+  for (int i = 0; i < n; ++i) {
+    free(strings[i]);
   }
+  free(strings);
 }
