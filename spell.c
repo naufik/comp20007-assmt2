@@ -67,7 +67,6 @@ void print_checked(List *dictionary, List *document) {
 }
 
 // see Assignment Task 4: Spelling correction
-// TODO: hashmap priorities
 void print_corrected(List *dictionary, List *document) {
   HashMap *d = list_to_dictionary(dictionary, 200000);
 
@@ -75,6 +74,7 @@ void print_corrected(List *dictionary, List *document) {
   while (current != NULL) {
     char *word = (char*)current->data;
       
+      // check for the word itself
       if (hashmap_find(d, word)) {
         printf("%s", word);
       } else {
@@ -82,6 +82,7 @@ void print_corrected(List *dictionary, List *document) {
         int n = n_edits(word);
         char *correction;
 
+        // if that fails, check for edit distance 1
         int min_index = INVALID;
         for (int i = 0; i < n; ++i) {
           char *current_word = possible_edits[i];
@@ -92,13 +93,13 @@ void print_corrected(List *dictionary, List *document) {
               correction = entry->key;
               min_index = entry->value;
             }
-            break;
-          }
-          if (min_index != INVALID) {
-            printf("%s", correction);
           }
         }
+        if (min_index != INVALID) {
+          printf("%s", correction);
+        }
 
+        // use naive search to check for edit distance 2 or 3.
         if (min_index == INVALID) {
           correction = naive_dictionary_search(dictionary, word,
             2, 3);
